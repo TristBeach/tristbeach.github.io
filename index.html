@@ -143,11 +143,18 @@
       border: 4px solid var(--bg);
     }
     .intro { flex: 1; min-width: 260px; }
+    .name-row { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
     .intro h1 { font-size: 2.3rem; font-weight: 800; letter-spacing: .005em; }
+    .pronouns {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: .85rem; font-weight: 500; color: var(--muted);
+      white-space: nowrap;
+    }
     .intro .role { color: var(--accent); font-size: 1.15rem; font-weight: 600; margin-top: 2px; }
     .intro p { color: var(--muted); margin-top: 14px; max-width: 60ch; }
 
-    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+    .actions { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 22px; }
+    .socials { display: flex; gap: 12px; }
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 11px 20px; border-radius: 10px; font-weight: 600;
@@ -158,6 +165,43 @@
     .btn-primary:hover { filter: brightness(1.07) saturate(1.05); box-shadow: var(--glow); }
     .btn-ghost { background: var(--card); color: var(--text); }
     .btn-ghost:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 6px 18px rgba(0,0,0,.16); }
+
+    /* Social link + attached QR button, lifted together on hover */
+    .social { display: inline-flex; transition: transform .18s ease; }
+    .social:hover { transform: translateY(-2px); }
+    .social .btn:hover { transform: none; position: relative; z-index: 1; }
+    .social > .btn:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+    .qr-btn {
+      padding: 11px 12px; margin-left: -1px; cursor: pointer; font: inherit;
+      border-top-left-radius: 0; border-bottom-left-radius: 0;
+    }
+
+    /* QR modal */
+    .qr-modal {
+      margin: auto; padding: 0; border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--card); color: var(--text);
+      width: min(340px, calc(100vw - 32px));
+      box-shadow: 0 24px 64px rgba(0,0,0,.45);
+    }
+    .qr-modal[open] { animation: qr-pop .18s ease-out; }
+    .qr-modal::backdrop { background: rgba(10, 4, 20, .6); backdrop-filter: blur(3px); }
+    @keyframes qr-pop { from { opacity: 0; transform: scale(.96); } }
+    .qr-inner { position: relative; padding: 28px 24px 24px; text-align: center; }
+    .qr-inner h2 { font-family: var(--font-head); font-size: 1.1rem; margin-bottom: 16px; }
+    .qr-code { border-radius: 12px; overflow: hidden; }
+    .qr-code svg { display: block; width: 100%; height: auto; }
+    .qr-code p { color: var(--muted); padding: 24px 0; }
+    .qr-url { display: block; margin-top: 14px; font-size: .88rem; word-break: break-all; }
+    .qr-close {
+      position: absolute; top: 10px; right: 10px;
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid transparent; background: none; color: var(--muted);
+      font-size: 1.3rem; line-height: 1; cursor: pointer;
+    }
+    .qr-close:hover { color: var(--accent); border-color: var(--border); }
+    @media (prefers-reduced-motion: reduce) {
+      .qr-modal[open] { animation: none; }
+    }
 
     /* Sections */
     section { padding: 28px 0; }
@@ -207,8 +251,18 @@
     @media (max-width: 560px) {
       header { padding-top: 48px; text-align: center; justify-content: center; }
       .intro h1 { font-size: 2rem; }
-      .actions { justify-content: center; }
+      .actions { align-items: center; }
       .job-head { flex-direction: column; }
+    }
+    /* Below ~745px the labeled social row no longer fits beside the avatar, so go icon-only
+       to keep all three on one row; labels stay for screen readers */
+    @media (max-width: 760px) {
+      .socials { gap: 10px; }
+      .socials .btn { padding: 11px 10px; }
+      .socials .label {
+        position: absolute; width: 1px; height: 1px; overflow: hidden;
+        clip-path: inset(50%); white-space: nowrap;
+      }
     }
   </style>
 </head>
@@ -269,32 +323,61 @@
         <img src="https://github.com/TristBeach.png" alt="Tristan Beach" />
       </a>
       <div class="intro">
-        <h1>Tristan Beach</h1>
+        <div class="name-row">
+          <h1>Tristan Beach</h1>
+          <span class="pronouns">They/He</span>
+        </div>
         <div class="role">Software Engineer</div>
         <p>Software Engineer with 10+ years of experience building full-stack and desktop applications using C#, PostgreSQL, and Vue.js. Proven background in industrial automation, inventory/logistics systems, and startup environments - comfortable owning features end-to-end, from requirements through deployment.</p>
         <div class="actions">
           <a class="btn btn-primary" href="Tristan_Beach_Resume.pdf" download>
             ⬇ Download Résumé (PDF)
           </a>
-          <a class="btn btn-ghost" href="https://www.linkedin.com/in/tristan-beach-858961104/" target="_blank" rel="noopener">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/>
-            </svg>
-            LinkedIn
-          </a>
-          <a class="btn btn-ghost" href="https://github.com/TristBeach" target="_blank" rel="noopener">
-            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-            </svg>
-            GitHub
-          </a>
-          <a class="btn btn-ghost" href="mailto:Trist.Beach@gmail.com">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="2.5" y="4.5" width="19" height="15" rx="2.5" />
-              <path d="m3 6 9 6.5L21 6" />
-            </svg>
-            Email
-          </a>
+          <div class="socials">
+            <div class="social">
+              <a class="btn btn-ghost" href="https://www.linkedin.com/in/tristan-beach-858961104/" target="_blank" rel="noopener">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/>
+                </svg>
+                <span class="label">LinkedIn</span>
+              </a>
+              <button class="btn btn-ghost qr-btn" type="button" data-label="LinkedIn" aria-label="Show LinkedIn QR code" title="Show QR code">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" />
+                  <path d="M14 14h3v3h-3zM21 14v.01M14 21h.01M17.5 21H21v-3.5" />
+                </svg>
+              </button>
+            </div>
+            <div class="social">
+              <a class="btn btn-ghost" href="https://github.com/TristBeach" target="_blank" rel="noopener">
+                <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                <span class="label">GitHub</span>
+              </a>
+              <button class="btn btn-ghost qr-btn" type="button" data-label="GitHub" aria-label="Show GitHub QR code" title="Show QR code">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" />
+                  <path d="M14 14h3v3h-3zM21 14v.01M14 21h.01M17.5 21H21v-3.5" />
+                </svg>
+              </button>
+            </div>
+            <div class="social">
+              <a class="btn btn-ghost" href="mailto:Trist.Beach@gmail.com">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="2.5" y="4.5" width="19" height="15" rx="2.5" />
+                  <path d="m3 6 9 6.5L21 6" />
+                </svg>
+                <span class="label">Email</span>
+              </a>
+              <button class="btn btn-ghost qr-btn" type="button" data-label="Email" aria-label="Show Email QR code" title="Show QR code">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" />
+                  <path d="M14 14h3v3h-3zM21 14v.01M14 21h.01M17.5 21H21v-3.5" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -454,7 +537,59 @@
     </footer>
   </div>
 
+  <dialog class="qr-modal" id="qr-modal" aria-labelledby="qr-title">
+    <div class="qr-inner">
+      <button class="qr-close" type="button" aria-label="Close">&times;</button>
+      <h2 id="qr-title"></h2>
+      <div class="qr-code"></div>
+      <a class="qr-url" target="_blank" rel="noopener"></a>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js" integrity="sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k" crossorigin="anonymous"></script>
   <script>
+    // QR modal: each .qr-btn encodes the href of the social link it sits beside.
+    (function () {
+      var modal = document.getElementById('qr-modal');
+      var title = document.getElementById('qr-title');
+      var code = modal.querySelector('.qr-code');
+      var urlEl = modal.querySelector('.qr-url');
+
+      function qrSvg(text) {
+        var qr = qrcode(0, 'M');
+        qr.addData(text);
+        qr.make();
+        var n = qr.getModuleCount(), m = 4, size = n + m * 2, d = '';
+        for (var r = 0; r < n; r++) {
+          for (var c = 0; c < n; c++) {
+            if (qr.isDark(r, c)) d += 'M' + (c + m) + ' ' + (r + m) + 'h1v1h-1z';
+          }
+        }
+        // Always dark-on-white with a quiet zone so it scans in either theme.
+        return '<svg viewBox="0 0 ' + size + ' ' + size + '" shape-rendering="crispEdges" role="img" aria-label="QR code">' +
+          '<rect width="' + size + '" height="' + size + '" fill="#fff"/><path fill="#160b29" d="' + d + '"/></svg>';
+      }
+
+      document.querySelectorAll('.qr-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var href = btn.previousElementSibling.href;
+          title.textContent = btn.dataset.label;
+          try {
+            code.innerHTML = qrSvg(href);
+          } catch (e) {
+            code.innerHTML = '<p>QR code unavailable right now.</p>';
+          }
+          urlEl.href = href;
+          urlEl.textContent = href.replace(/^mailto:/, '').replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+          modal.showModal();
+        });
+      });
+
+      modal.querySelector('.qr-close').addEventListener('click', function () { modal.close(); });
+      // Clicks on the dialog element itself (not .qr-inner) are backdrop clicks.
+      modal.addEventListener('click', function (e) { if (e.target === modal) modal.close(); });
+    })();
+
     (function () {
       var root = document.documentElement;
       var btn = document.querySelector('.theme-toggle');
